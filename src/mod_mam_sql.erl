@@ -355,12 +355,12 @@ make_sql_query(User, LServer, MAMQuery, RSM, ExtraUsernames) ->
     {Max, Direction, ID} = get_max_direction_id(RSM),
     ODBCType = ejabberd_option:sql_type(LServer),
     ToString = fun(S) -> ejabberd_sql:to_string_literal(ODBCType, S) end,
-    LimitClause = if is_integer(Max), Max >= 0, ODBCType /= mssql ->
+    LimitClause = if is_integer(Max), Max >= 0, ODBCType /= mssql, ODBCType /= mssqlodbc ->
 			  [<<" limit ">>, integer_to_binary(Max+1)];
 		     true ->
 			  []
 		  end,
-    TopClause = if is_integer(Max), Max >= 0, ODBCType == mssql ->
+    TopClause = if is_integer(Max), Max >= 0, (ODBCType == mssql) or (ODBCType == mssqlodbc) ->
 			  [<<" TOP ">>, integer_to_binary(Max+1)];
 		     true ->
 			  []

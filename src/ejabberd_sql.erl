@@ -73,7 +73,7 @@
 
 -record(state,
 	{db_ref               :: undefined | pid(),
-	 db_type = odbc       :: pgsql | mysql | sqlite | odbc | mssql,
+	 db_type = odbc       :: pgsql | mysql | sqlite | odbc | mssql | mssqlodbc,
 	 db_version           :: undefined | non_neg_integer(),
 	 host                 :: binary(),
 	 pending_requests     :: p1_queue:queue(),
@@ -259,6 +259,8 @@ to_string_literal(mysql, S) ->
     <<"'", (escape(S))/binary, "'">>;
 to_string_literal(mssql, S) ->
     <<"'", (standard_escape(S))/binary, "'">>;
+to_string_literal(mssqlodbc, S) ->
+    <<"'", (standard_escape(S))/binary, "'">>;
 to_string_literal(sqlite, S) ->
     <<"'", (standard_escape(S))/binary, "'">>;
 to_string_literal(pgsql, S) ->
@@ -353,6 +355,7 @@ connecting(connect, #state{host = Host} = State) ->
            [pgsql | Args] -> apply(fun pgsql_connect/8, Args);
            [sqlite | Args] -> apply(fun sqlite_connect/1, Args);
 		   [mssql | Args] -> apply(fun odbc_connect/2, Args);
+		   [mssqlodbc | Args] -> apply(fun odbc_connect/2, Args);
 		   [odbc | Args] -> apply(fun odbc_connect/2, Args)
 		 end,
     case ConnectRes of
@@ -596,6 +599,8 @@ sql_query_internal(#sql_query{} = Query) ->
                     generic_sql_query(Query);
 		mssql ->
 		    mssql_sql_query(Query);
+		mssqlodbc ->
+		    mssql_sql_query(Query);
                 pgsql ->
                     Key = {?PREPARE_KEY, Query#sql_query.hash},
                     case get(Key) of
@@ -662,6 +667,9 @@ sql_query_internal(Query) ->
 		to_odbc(odbc:sql_query(State#state.db_ref, [Query],
                                        QueryTimeout - 1000));
 	    mssql ->
+		to_odbc(odbc:sql_query(State#state.db_ref, [Query],
+                                       QueryTimeout - 1000));
+	    mssqlodbc ->
 		to_odbc(odbc:sql_query(State#state.db_ref, [Query],
                                        QueryTimeout - 1000));
 	    pgsql ->
@@ -819,16 +827,19 @@ sql_query_to_iolist(SQLQuery) ->
 sql_begin() ->
     sql_query_internal(
       [{mssql, [<<"begin transaction;">>]},
+       {mssqlodbc, [<<"begin transaction;">>]},
        {any, [<<"begin;">>]}]).
 
 sql_commit() ->
     sql_query_internal(
       [{mssql, [<<"commit transaction;">>]},
+       {mssqlodbc, [<<"commit transaction;">>]},
        {any, [<<"commit;">>]}]).
 
 sql_rollback() ->
     sql_query_internal(
       [{mssql, [<<"rollback transaction;">>]},
+       {mssqlodbc, [<<"rollback transaction;">>]},
        {any, [<<"rollback;">>]}]).
 
 
@@ -1072,6 +1083,8 @@ db_opts(Host) ->
     case Type of
         odbc ->
             [odbc, Server, Timeout];
+        mssqlodbc ->
+            [mssqlodbc, Server, Timeout];
         sqlite ->
             [sqlite, Host];
         _ ->

@@ -668,6 +668,12 @@ get_items(Nidx, _From, #rsm_set{max = Max, index = IncIndex,
 			 " itemid, publisher, creation, modification, payload",
 			 " from pubsub_item", Filters/binary>>]);
 			 %OFFSET 10 ROWS FETCH NEXT 10 ROWS ONLY;
+	       (mssqlodbc, _) ->
+		    ejabberd_sql:sql_query_t(
+		      [<<"select top ", (integer_to_binary(Limit))/binary,
+			 " itemid, publisher, creation, modification, payload",
+			 " from pubsub_item", Filters/binary>>]);
+			 %OFFSET 10 ROWS FETCH NEXT 10 ROWS ONLY;
 	       (_, _) ->
 		    ejabberd_sql:sql_query_t(
 		      [<<"select itemid, publisher, creation, modification, payload",
@@ -727,6 +733,12 @@ get_last_items(Nidx, _From, Limit) ->
 			 " itemid, publisher, creation, modification, payload",
 			 " from pubsub_item where nodeid='", SNidx/binary,
 			 "' order by modification desc">>]);
+	       (mssqlodbc, _) ->
+		    ejabberd_sql:sql_query_t(
+		      [<<"select top ", (integer_to_binary(Limit))/binary,
+			 " itemid, publisher, creation, modification, payload",
+			 " from pubsub_item where nodeid='", SNidx/binary,
+			 "' order by modification desc">>]);
 	       (_, _) ->
 		    ejabberd_sql:sql_query_t(
 		      [<<"select itemid, publisher, creation, modification, payload",
@@ -746,6 +758,10 @@ get_only_item(Nidx, _From) ->
     SNidx = misc:i2l(Nidx),
     Query = fun(mssql, _) ->
 	ejabberd_sql:sql_query_t(
+	    [<<"select  itemid, publisher, creation, modification, payload",
+	       " from pubsub_item where nodeid='", SNidx/binary, "'">>]);
+	       (mssqlodbc, _) ->
+		   ejabberd_sql:sql_query_t(
 	    [<<"select  itemid, publisher, creation, modification, payload",
 	       " from pubsub_item where nodeid='", SNidx/binary, "'">>]);
 	       (_, _) ->

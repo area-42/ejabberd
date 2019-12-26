@@ -377,7 +377,7 @@ opt_type(sql_ssl_verify) ->
 opt_type(sql_start_interval) ->
     econf:timeout(second);
 opt_type(sql_type) ->
-    econf:enum([mysql, pgsql, sqlite, mssql, odbc]);
+    econf:enum([mysql, pgsql, sqlite, mssql, odbc, mssqlodbc]);
 opt_type(sql_username) ->
     econf:binary();
 opt_type(sql_prepared_statements) ->

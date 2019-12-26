@@ -84,7 +84,7 @@ update_sql() ->
       end, ejabberd_option:hosts()).
 
 -record(state, {host :: binary(),
-                dbtype :: mysql | pgsql | sqlite | mssql | odbc,
+                dbtype :: mysql | pgsql | sqlite | mssql | mssqlodbc | odbc,
                 escape}).
 
 update_sql(Host) ->
@@ -103,6 +103,7 @@ update_sql(Host) ->
             Escape =
                 case DBType of
                     mssql -> fun ejabberd_sql:standard_escape/1;
+                    mssqlodbc -> fun ejabberd_sql:standard_escape/1;
                     sqlite -> fun ejabberd_sql:standard_escape/1;
                     _ -> fun ejabberd_sql:escape/1
                 end,

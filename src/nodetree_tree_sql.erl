@@ -149,6 +149,10 @@ get_nodes(Host, Limit) ->
 		    ejabberd_sql:sql_query_t(
 		      ?SQL("select top %(Limit)d @(node)s, @(parent)s, @(plugin)s, @(nodeid)d "
 			   "from pubsub_node where host=%(H)s"));
+	       (mssqlodbc, _) when is_integer(Limit), Limit>=0 ->
+		    ejabberd_sql:sql_query_t(
+		      ?SQL("select top %(Limit)d @(node)s, @(parent)s, @(plugin)s, @(nodeid)d "
+			   "from pubsub_node where host=%(H)s"));
 	       (_, _) when is_integer(Limit), Limit>=0 ->
 		    ejabberd_sql:sql_query_t(
 		      ?SQL("select @(node)s, @(parent)s, @(plugin)s, @(nodeid)d "
@@ -190,6 +194,10 @@ get_parentnodes_tree(Host, Node, Level, Acc) ->
 get_subnodes(Host, Node, Limit) ->
     H = node_flat_sql:encode_host(Host),
     Query = fun(mssql, _) when is_integer(Limit), Limit>=0 ->
+		    ejabberd_sql:sql_query_t(
+		      ?SQL("select top %(Limit)d @(node)s, @(parent)s, @(plugin)s, @(nodeid)d "
+			   "from pubsub_node where host=%(H)s and parent=%(Node)s"));
+	       (mssqlodbc, _) when is_integer(Limit), Limit>=0 ->
 		    ejabberd_sql:sql_query_t(
 		      ?SQL("select top %(Limit)d @(node)s, @(parent)s, @(plugin)s, @(nodeid)d "
 			   "from pubsub_node where host=%(H)s and parent=%(Node)s"));

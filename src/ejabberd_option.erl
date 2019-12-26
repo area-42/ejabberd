@@ -997,10 +997,10 @@ sql_start_interval() ->
 sql_start_interval(Host) ->
     ejabberd_config:get_option({sql_start_interval, Host}).
 
--spec sql_type() -> 'mssql' | 'mysql' | 'odbc' | 'pgsql' | 'sqlite'.
+-spec sql_type() -> 'mssql' | 'mssqlodbc' | 'mysql' | 'odbc' | 'pgsql' | 'sqlite'.
 sql_type() ->
     sql_type(global).
--spec sql_type(global | binary()) -> 'mssql' | 'mysql' | 'odbc' | 'pgsql' | 'sqlite'.
+-spec sql_type(global | binary()) -> 'mssql' | 'mssqlodbc' | 'mysql' | 'odbc' | 'pgsql' | 'sqlite'.
 sql_type(Host) ->
     ejabberd_config:get_option({sql_type, Host}).
 
